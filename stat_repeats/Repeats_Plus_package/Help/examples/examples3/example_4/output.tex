@@ -1,0 +1,31 @@
+\documentclass[a4paper]{article}                                   
+\usepackage{pgfplots}                                            
+\usepackage{pdflscape}                                           
+\hoffset -2.5cm                                                  
+\voffset 14cm                                                    
+\textwidth 260mm                                                 
+\textheight 90mm                                                 
+\pagestyle{empty}                                                
+\pgfplotsset{width=26cm,compat=1.9}                              
+\pagestyle{empty}                                                
+\begin{document}                                                 
+\thispagestyle{empty}                                            
+\begin{landscape}                                                
+\begin{tikzpicture}                                              
+\begin{axis}                                                     
+[title={ENTER YOUR TITLE HERE},                                   
+width=26cm,compat=1.5,height=9cm,                                 
+xtick={1,100,..., 1000},                                          
+xticklabels={10,2009,4008,6007,8006,10005,12004,14003,16002,18001,20000},
+ytick=\empty,yticklabels=\empty,                                
+xmin=1.0,xmax=1000.0,
+ymin=0,ymax=40,
+grid=both,grid style={line width=.1pt, draw=gray!10},major grid style={line width=.2pt,draw=gray!50},minor tick num=5,enlargelimits={abs=0.5},                  
+]                  
+\draw [green] (1.0,10.0) -- (1000.0,10.0);                  
+\draw [red,->] (407.953979,10.0) to [bend left] (875.137573,10.0); % row from AY354458.1,8164,8173,17503,17512,10,AAATGATAAT,AAATGATAAT
+
+\end{axis}                                
+\end{tikzpicture}                         
+\end{landscape}                           
+\end{document}                            

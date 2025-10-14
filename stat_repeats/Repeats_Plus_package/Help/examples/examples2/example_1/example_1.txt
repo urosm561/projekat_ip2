@@ -1,0 +1,5 @@
+Example 1. Calculate (dn) repeats with minimal length 10 in Zaire ebolavirus</a> isolate Ebola virus/H.sapiens-tc/COD/1976/Yambuku-Mayinga nucleotide sequence (NCBI id NC_002549)
+
+Input file : NC_002549.fasta
+Syntax:      ./Repeats NC_002549.fasta 10
+Output file: standard output (screen)

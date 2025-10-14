@@ -1,0 +1,25 @@
+Calculate different type of repeats with or without probability estimation for Zaire ebolavirus</a> isolate Ebola virus/H.sapiens-tc/COD/1976/Yambuku-Mayinga nucleotide sequence (NCBI id NC_002549) and write output to file
+
+a) Calculate direct non-complementary repeats of length at least 10 with probability estimation and p-value=0.1
+
+Input file  : NC_002549.fasta
+Syntax:      ./StatRepeats NC_002549.fasta 10 -dn -out NC_002549.dn_10_0.1.out -pv 0.1
+Output file : NC_002549.dn_10_0.1.out
+
+
+b) Calculate direct non-complementary repeats of length at least 10 with default probability estimation (p-value=0.05)
+
+Input file  : NC_002549.fasta
+Syntax:      ./StatRepeats NC_002549.fasta 10 -dn -out NC_002549.dn_10_0.05.out -pv 0.05
+or           ./StatRepeats NC_002549.fasta 10 -dn -out NC_002549.dn_10_default.out 
+Output file : NC_002549.dn_10_0.1.out
+              NC_002549.dn_10_default.out
+
+
+c) Calculate inverse complementary repeats of length at least 10 without probability estimation
+
+Input file  : NC_002549.fasta
+Syntax:      ./StatRepeats NC_002549.fasta 10 -ic -out NC_002549.ic_10_without_p.out -n
+Output file : NC_002549.ic_10_without_p.out
+
+

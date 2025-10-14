@@ -1,0 +1,12 @@
+Working with  NC_002549 file.
+Motif mask is ACT.GAC.
+
+NC_002549, 1554, ACTTGAC
+NC_002549, 2181, ACTGGAC
+NC_002549, 7221, ACTTGAC
+NC_002549, 7586, ACTGGAC
+NC_002549, 8155, ACTTGAC
+NC_002549, 16040, ACTTGAC
+
+Found 6 matches.
+Expected 4.622922 in random sequence with the same length.

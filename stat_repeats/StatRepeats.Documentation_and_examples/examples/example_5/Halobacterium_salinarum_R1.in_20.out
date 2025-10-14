@@ -1,0 +1,67 @@
+Input file is Halobacterium_salinarum_R1.fasta .
+Minimal fragment length is 20 .
+Alphabet size is 4 .
+Working with probabilty estimation.
+P value is : 0.050000 .
+Printing all instances.
+Looking for inverse non-complementary repeats.
+NC_010364,1695041,1695061,1695041,1695061,21,aacaccgacacacagccacaa,aacaccgacacacagccacaa
+NC_010364,1315766,1315785,1315766,1315785,20,caacggtatggtatggcaac,caacggtatggtatggcaac
+NC_010364,1391983,1392002,1488207,1488226,20,caccgggggctgagccgcgc,cgcgccgagtcgggggccac
+NC_010364,157177,157197,1682418,1682438,21,cagccggcgctccaccagccg,gccgaccacctcgcggccgac
+NC_010364,614614,614635,813452,813473,22,cagcggcagcagccacacggcc,ccggcacaccgacgacggcgac
+NC_010364,428323,428342,1183047,1183066,20,ccaacaggaccgtgctggac,caggtcgtgccaggacaacc
+NC_010364,1044131,1044151,1044131,1044151,21,cccgcagcgcccgcgacgccc,cccgcagcgcccgcgacgccc
+NC_010364,1830222,1830243,1830222,1830243,22,cccgccaccgccgccaccgccc,cccgccaccgccgccaccgccc
+NC_010364,225924,225943,962153,962172,20,cccgcgcccgccgccgccgc,cgccgccgccgcccgcgccc
+NC_010364,1278248,1278267,1352659,1352678,20,ccgagcgcggcggcgccggc,cggccgcggcggcgcgagcc
+NC_010364,339099,339118,1404187,1404206,20,ccgcgaccggctgctggagc,cgaggtcgtcggccagcgcc
+NC_010364,1206755,1206775,1743375,1743395,21,ccggccaggacaccgcaagcg,gcgaacgccacaggaccggcc
+NC_010364,1358581,1358600,1718727,1718746,20,ccggcggcggcggcggtggt,tggtggcggcggcggcggcc
+NC_010364,1077898,1077918,1793414,1793434,21,cgacagccggcgcgtcggctg,gtcggctgcgcggccgacagc
+NC_010364,54596,54615,1940687,1940706,20,cgagctggctatcggcccgc,cgcccggctatcggtcgagc
+NC_010364,1932028,1932048,1932028,1932048,21,cgagtccgcgggcgcctgagc,cgagtccgcgggcgcctgagc
+NC_010364,718988,719014,718988,719014,27,cgccgccaccaccgccaccaccgccgc,cgccgccaccaccgccaccaccgccgc
+NC_010364,516201,516220,1654727,1654746,20,cgcctccggcggcgggctga,agtcgggcggcggcctccgc
+NC_010364,1397656,1397676,1397656,1397676,21,cgcgacgaccgccagcagcgc,cgcgacgaccgccagcagcgc
+NC_010364,1168849,1168869,1168849,1168869,21,cgcgagcgcctccgcgagcgc,cgcgagcgcctccgcgagcgc
+NC_010364,1694520,1694539,1783959,1783978,20,cgcgagctgcgggcggcggc,cggcggcgggcgtcgagcgc
+NC_010364,367563,367582,948300,948319,20,cgcgcggtcgtccagcccgt,tgcccgacctgctggcgcgc
+NC_010364,450068,450087,633045,633064,20,cgcgggcggcggcccgcacc,ccacgcccggcggcgggcgc
+NC_010364,416033,416052,1762876,1762895,20,cggcagaccgacgggctggg,gggtcgggcagccagacggc
+NC_010364,169824,169843,1512197,1512216,20,cgggaggcggtcgcgcaggc,cggacgcgctggcggagggc
+NC_010364,507473,507495,771685,771707,23,cgtcgagcgccgcgcgagccagg,ggaccgagcgcgccgcgagctgc
+NC_010364,114233,114252,1233258,1233277,20,cgtcgaggtgctcctggagg,ggaggtcctcgtggagctgc
+NC_010364,1283590,1283609,1787965,1787984,20,cgtcggccagcgcgtcggcg,gcggctgcgcgaccggctgc
+NC_010364,1002526,1002545,1787965,1787984,20,cgtcggccagcgcgtcggcg,gcggctgcgcgaccggctgc
+NC_010364,1102539,1102560,1279041,1279062,22,ctcgacggtccccagcaccagc,cgaccacgacccctggcagctc
+NC_010364,1674559,1674578,1674559,1674578,20,gcagcggcaccacggcgacg,gcagcggcaccacggcgacg
+NC_010364,957054,957074,1156377,1156397,21,gcatgtcgtcggcgcgctcga,agctcgcgcggctgctgtacg
+NC_010364,1081121,1081141,1081121,1081141,21,gccgccgagcacgagccgccg,gccgccgagcacgagccgccg
+NC_010364,178166,178185,1589764,1589783,20,gccggcgctggcggcccgca,acgcccggcggtcgcggccg
+NC_010364,1079643,1079663,1520796,1520816,21,gccggcgtactcgccgccggt,tggccgccgctcatgcggccg
+NC_010364,177336,177355,452664,452683,20,gccggggccgccggctccgc,cgcctcggccgccggggccg
+NC_010364,691294,691313,1444413,1444432,20,gcgcaggtcgtcggggcgca,acgcggggctgctggacgcg
+NC_010364,1918038,1918064,1918038,1918064,27,gcggcggcggtggcggtggcggcggcg,gcggcggcggtggcggtggcggcggcg
+NC_010364,1348229,1348249,1787965,1787985,21,gcgtcggccagcgcgtcggcg,gcggctgcgcgaccggctgcg
+NC_010364,526495,526514,617139,617158,20,gctcggggtgctcgtcatcg,gctactgctcgtggggctcg
+NC_010364,1404063,1404084,1404063,1404084,22,gctgcgaccgccgccagcgtcg,gctgcgaccgccgccagcgtcg
+NC_010364,1388762,1388781,1388762,1388781,20,gcttgagcgccgcgagttcg,gcttgagcgccgcgagttcg
+NC_010364,1540392,1540411,1540392,1540411,20,ggcgcacgaggagcacgcgg,ggcgcacgaggagcacgcgg
+NC_010364,868125,868144,1206951,1206970,20,ggcgcgagcacaaccagcag,gacgaccaacacgagcgcgg
+NC_010364,960048,960070,960048,960070,23,ggcgcgtcgccaccgctgcgcgg,ggcgcgtcgccaccgctgcgcgg
+NC_010364,518143,518165,518143,518165,23,ggcgctgctcgcgctcgtcgcgg,ggcgctgctcgcgctcgtcgcgg
+NC_010364,586717,586738,1843415,1843436,22,ggtcgccgtccgcgaccgcctg,gtccgccagcgcctgccgctgg
+NC_010364,778374,778405,778374,778405,32,ggtcgcggccgcggcggcggcgccggcgctgg,ggtcgcggccgcggcggcggcgccggcgctgg
+NC_010364,477406,477425,1151550,1151569,20,gtcgcgaagctccaggaacg,gcaaggacctcgaagcgctg
+NC_010364,767382,767401,1785683,1785702,20,gtgggcgtcggccgtggcgc,cgcggtgccggctgcgggtg
+NC_010364,1585352,1585372,1585352,1585372,21,tccggctggcgcggtcggcct,tccggctggcgcggtcggcct
+NC_010364,1849768,1849788,1849768,1849788,21,tgccgtcgcccccgctgccgt,tgccgtcgcccccgctgccgt
+
+Total for length 20 is 27.
+Total for length 21 is 14.
+Total for length 22 is 5.
+Total for length 23 is 3.
+Total for length 27 is 2.
+Total for length 32 is 1.
+

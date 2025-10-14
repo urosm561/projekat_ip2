@@ -1,0 +1,22 @@
+1. Find direct non-complementary repeats in Insulin receptor isoform Long preproprotein, Homo sapiens (NCBI RefSeq. NP_000199.2) of minimal length 4  without making a difference among different aromatic amino acids (concerning all aromatic AA the same in repeats).  
+
+Input file  : NP_000199.2.fasta
+Syntax:     : ./StatRepeats NP_000199.2.fasta 4 -dn -protein -aromatic -out NP_000199.2.fasta.dn_4.aromatic.out
+Output file : NP_000199.2.fasta.dn_4.aromatic.out
+
+
+
+2. Find direct non-complementary repeats in Insulin receptor isoform Long preproprotein, Homo sapiens (NCBI RefSeq. NP_000199.2) of minimal length 5 concerning all positive AA the same and all tiny AA the same in repeats.  
+
+Input file  : NP_000199.2.fasta
+Syntax:     : ./StatRepeats NP_000199.2.fasta 5 -dn -protein -positive -tiny -out NP_000199.2.fasta.dn_5.positive_tiny.out
+Output file : NP_000199.2.fasta.dn_5.positive_tiny.out
+ 
+
+
+3. Find, without probability estimation, inverse non-complementary repeats in Insulin receptor isoform Long preproprotein, Homo sapiens (NCBI RefSeq. NP_000199.2) of minimal length 5 concerning all aliphatic AA the same and all charged AA the same in repeats.  
+
+Input file  : NP_000199.2.fasta
+Syntax:     : ./StatRepeats NP_000199.2.fasta 5 -n -in -protein -aliphatic -charged -out NP_000199.2.fasta.in_5.aliphatic_charged.out
+Output file : NP_000199.2.fasta.in_5.aliphatic_charged.out
+

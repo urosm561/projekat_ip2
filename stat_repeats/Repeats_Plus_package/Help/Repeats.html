@@ -1,0 +1,286 @@
+<!-- saved from url=(0022)http://internet.e-mail -->
+<html>
+<head>
+    <title>Repeats</title>
+</head>
+<body>
+    <h1>Repeats</h1>
+    <p> Repeats is a tool  for finding maximal repeats. It can extract four types of repeats: direct non-complementary, direct complementary, inverse non-complementary and inverse complementary repeats. Repeats that satisfy motif mask can be found as well as repeats with ambigious letters. Results can be redirected to the standard output, to files in different formats.</p>
+    <h2>Table of Contents</h2>
+    <ul>
+        <li><a href="#usage">Usage</a></li>
+        <li><a href="#Optionalarguments">Optional arguments</a></li>
+        <ul>
+            <li><a href="#fileoutput">File output options</a></li>
+            <li><a href="#seqtypes">Repeat types options</a></li>
+            <li><a href="#motif">Motif filtering</a></li>
+            <li><a href="#alphabet">Options related to input sequence characteristics</a></li>
+
+        </ul>
+        <li><a href="#download">Download</a></li>
+        <li><a href="#setup">Setup Instructions</a></li>
+        <ul>
+            <li><a href="#windows">Windows</a></li>
+            <li><a href="#linux">Linux</a></li>
+        </ul>
+    </ul>
+
+    <h2 id="usage">Usage</h2>
+    <b>Repeats</b>  &lt <i>input file name</i> &gt   &lt <i>minimal length</i> &gt [optional arguments] <br>
+    where
+    <ul>
+        <li><i>Input file name</i> and <i>minimal length</i> are mandatory arguments.<br>
+        <li><i>Input file name</i> is the name of the FASTA file to be processed. The file can contain multiple FASTA sequences, which are by default processed one by one.<br>
+        <li><i>Minimal length</i> specifies the minimal length of the extracted repeats. 
+    </ul>
+    Repeats by default can handle collection of multiple fasta sequences in one file. Every sequence is processed separately by default; program options are applied on
+    all fasta sequences. Calculation is done as a series of calculations for each sequence. Output for each calculation is appended at the end of the previous one.
+    <p>
+        Example: <a href="./examples/examples2/example_1/example_1.txt">calculate  (dn) repeats with minimal length 10</a>.
+        <br>
+        Note: In this and all further examples, it is assumed that the Repeats program is in the same directory as the input data
+    </p>
+
+    <h2 id="Optionalarguments">Optional arguments</h2>
+
+    <h3 id="fileoutput">File output options</h3>
+    <p>By default Repeats will print all results to the standard output.</p>
+    <p>
+        <b>General output format: </b>[&lt<i>prefix</i>&gt],&lt<i>LP start position</i>&gt, &lt<i>LP end position</i>&gt,
+        &lt<i>RP start position</i>&gt, &lt<i>RP end position</i>&gt, &lt<i>sequence length</i>&gt,
+        &lt<i>LP</i>&gt, &lt<i>RP</i>&gt <br>
+        where LP and RP are the left and right parts of repeat sequence.
+        <i>Prefix</i> in result is taken from fasta header in input file. If fasta header is not present prefix is null (i.e. not exists).
+        Both start and end position of left and right parts of repeat sequence are included in order to make furher processing more efficient.
+    <p><br></p>
+    <h4>Options related to file output</h4>
+    <p></p>
+    <TABLE CELLPADDING="0" CELLSPACING="5">
+        <TR ALIGN="LEFT">
+            <TD style="padding: 0 15px; vertical-align:top;"><a><i>-o[utput] filename</i> </a></TD>
+            <TD style="padding: 0 15px;"><a> Write results to a specified file. Default for output is writing results on console. When -output option is specified, other  output options are ignored </a></TD>
+        <TR ALIGN="LEFT">
+        </TR>
+        <TD style="padding: 0 15px; vertical-align:top;"><a><i>-loa[d] name</i></a></TD>
+        <TD style="padding: 0 15px;">
+            <a>
+                Produce three output files. Sequence name is written in file <i>name.id</i>, statistics are written in file <i>name.stat</i>, and results are written to a file <i>name.load.</i>
+                If <i>-load name</i> option is combined with multiple fasta sequences in one file, then output for all sequences is placed in three files name.id, name.stat and name.load
+            </a>
+        </TD>
+        </TR>
+        <TR ALIGN="LEFT">
+        </TR>
+        <TD style="padding: 0 15px; width:250px; vertical-align:top;"><a><i>-sp[lit]</i></a></TD>
+        <TD style="padding: 0 15px;">
+            <a>
+                Produce three output files. Sequence name is written in file named sequencename.id, statistics are written in file named sequencename.stat, and results are written in file named sequencename.load.
+                Input file must have fasta header. In opposite case, generated files with results have no prefix and start with "." (.id, .load, .stat).
+                If <i>-split</i> option is combined with multiple fasta sequences in one file, then output produce, for each sequence in input file, three files with sufixes .id, .stat and .load and prefix equal with id from fasta header
+            </a>
+        </TD></a></TD>
+        </TR>
+        <TR ALIGN="LEFT">
+            <TD style="padding: 0 15px; vertical-align:top;"><a> <i>-pri[ntinstanes] &lt;true | false&gt;</i></a></TD>
+            <TD style="padding: 0 15px;"><a>Specifies whether to output found pairs of sequences. -pri[ntinstanes] &lt;false&gt can be used as a quick way to count the number of pairs found. -pri[ntinstanes] &lt;true&gt is the default option</a></TD>
+        </TR>
+
+    </TABLE>
+    <p></p>
+    Example: <a href="./examples/examples2/example_2/example_2.txt">calculate (dn) repeats and write output to file</a>&nbsp;&nbsp;<a href="./examples/examples2/example_2/">
+        <p><br></p></a>
+        <h3 id="seqtypes">Repeat types options</h3>
+        <p></p>
+        <TABLE CELLPADDING="0" CELLSPACING="5">
+            <TR ALIGN="LEFT">
+                <TD style="padding: 0 15px; vertical-align:top;"><a><i>-dn</i> </a></TD>
+                <TD style="padding: 0 15px;"><a> Search for direct non-complementary repeats </a></TD>
+            <TR ALIGN="LEFT">
+            </TR>
+            <TD style="padding: 0 15px; vertical-align:top;"><a><i>-dc</i></a></TD>
+            <TD style="padding: 0 15px;"><a>Search for direct complementary repeats</a></TD>
+            </TR>
+            <TR ALIGN="LEFT">
+            </TR>
+            <TD style="padding: 0 15px; vertical-align:top;"><a><i>-in</i></a></TD>
+            <TD style="padding: 0 15px;"><a>Search for inverse non-complementary repeats </a></TD>
+            </TR>
+            <TR ALIGN="LEFT">
+                <TD style="padding: 0 15px; vertical-align:top;"><a> <i>-ic</i></a></TD>
+                <TD style="padding: 0 15px;"><a>Search for inverse complementary repeats </a></TD>
+            </TR>
+
+        </TABLE>
+        <p></p>
+    </a>
+    If none of these options is specified the default is -dn.<br>
+    <p>Example: <a href="./examples/examples2/example_3/example_3.txt">calculate different types of repeats</a>&nbsp;&nbsp;<a href="./examples/examples2/example_3/"></p>
+    <p><br></p></a>
+
+
+        <h3 id="motif">Motif Filtering</h3></a>
+        Repeats can find repeats that satisfy a given motif mask. The option can be specified as:
+        <p></p>
+        <TABLE CELLPADDING="0" CELLSPACING="5">
+            <TR ALIGN="LEFT">
+                <TD style="padding: 0 15px; vertical-align:top;"><a><i>-mot[if] motif</i> </a></TD>
+                <TD style="padding: 0 15px;"><a> Specifies motif that is used to filter found repeats </a></TD>
+
+            </TR>
+        </TABLE>
+        <p></p></a>
+        Example: <a href="./examples/examples2/example_5/example_5.txt">calculate repeats taht satisfy motif mask </a>&nbsp;&nbsp;<a href="./examples/examples2/example_5/">
+            <p><br></p></a>
+
+            <h3 id="alphabet">Options related to input sequence characteristics</h3></a>
+            Notes:
+            <ul>
+                <li>
+                    Repeats can handle an arbitrary alphabet. In the case of complementary repeat search letter complements must be specified.
+                    Input alphabet must include even number of characters (even - character and its complement)
+                <li>
+                    If input material includes characters not defined in the alphabet, then number of such character is reported, and
+                    each of these characters is assumed to be its own complement.
+                <li>
+                    In options <i>aliphatic, sulphur, tiny, aromatic, hydrophobic, charged, positive, polar, acidic, small, </i>and <i>hydroxylic</i>  amino acids are groupped according to Esquivel et al:<i>Decoding the Building Blocks of Life from the Perspective of Quantum Information</i> in  "Advances in Quantum Mechanics", Paul Bracken (ed.), INTECH, Rijeka, pp: 641--669, (2013).
+                    <br>
+                    If some of this options is used options -protein must be specified for correct results. Multiple options from this group can be specified only if intersection of their AA groups is empty.
+            </ul>
+            <p></p>
+            Options:
+            <p></p>
+            <TABLE CELLPADDING="0" CELLSPACING="5">
+                <TR ALIGN="LEFT">
+                    <TD style="padding: 0 15px; vertical-align:top;"><a> <i>-dna</i>       </a></TD>
+                    <TD style="padding: 0 15px;"><a> Specifies that the input sequence is DNA with the letters ACGT having the complements TGCA. This option is the default </a></TD>
+                <TR ALIGN="LEFT">
+                </TR>
+                <TD style="padding: 0 15px; vertical-align:top;"><a> <i>-rna</i></a></TD>
+                <TD style="padding: 0 15px;"><a> Specifies that the input sequence is RNA with the letters ACGU having the complements UGCA</a></TD>
+                </TR>
+                <TR ALIGN="LEFT">
+                </TR>
+                <TD style="padding: 0 15px; width:250px; vertical-align:top;"><a><i>-compl[ement]&lt;filename&gt;</i></a></TD>
+                <TD style="padding: 0 15px;">
+                    <a>
+                        Specifies the file with the letters and their complements. The file should be a text file with an even number of letters. The first two letters form a pair with the first letter having the second letter as a complement, then the second two letters form another pair, etc.
+                    </a>
+                </TD>
+                </TR>
+                <TR ALIGN="LEFT">
+                    <TD style="padding: 0 15px; vertical-align:top;"><a> <i>-ex[clude] len</i></a></TD>
+                    <TD style="padding: 0 15px;">
+                        <a>
+                            Exclude every consecutive <i>len</i> or more letters N from repeat searching. The letter N is genomic sequences is used to specify an unknown nucleid acid.
+                            Large islands of N's typically lead to an explosion of found pairs. This option instructs Repeats to skip over any island of <i>len</i> or more consecutive N's.
+                            If -exclude 0 is specified than all N will be excluded.
+                            Repeats can exclude every consecutive <i>len</i> or more arbitrary <i>letters</i> from repeat searching if with exclude option -letter <i>letter</i> option is used, where <i>letter</i> specifies the letter to be excluded.
+
+                        </a>
+                    </TD>
+                </TR>
+
+                <TR ALIGN="LEFT">
+                    <TD style="padding: 0 15px; vertical-align:top;"><a> <i>-msr</i></a></TD>
+                    <TD style="padding: 0 15px;"><a>Treat a multi-sequence FASTA file as a single large sequence. All sequences in the output pair are characterized by the sequence name and intra-sequence position</a></TD>
+                </TR>
+
+                <TR ALIGN="LEFT">
+                    <TD style="padding: 0 15px; vertical-align:top;"><a><i>-max[gap] number</i></a></TD>
+                    <TD style="padding: 0 15px;"><a>Specifies the maximal gap between two repeats in results. If max=0 then program is search for <i>tandem</i> repeats. If not, specified maximal gap is not set.</a></TD>
+                </TR>
+
+
+                <TR ALIGN="LEFT">
+                    <TD style="padding: 0 15px; vertical-align:top;"><a> <i>-protein</i></a></TD>
+                    <TD style="padding: 0 15px;"><a>Specifies that the input sequence(s) are proteins. Proteins don't support extraction of complementary repeats as they don't have complements so this option just informs StatRepeats of the alphabet cardinality so that probabilities can be computed. Alphabet cardinality is 20, 21 or 22 depending on the input sequence. Different mappings are also provided when using proteins.</a></TD>
+                </TR>
+                <TR ALIGN="LEFT">
+                    <TD style="padding: 0 35px; vertical-align:top;"><a> <i>-acidic</i></a></TD>
+                    <TD style="padding: 0 15px;"><a> Specifies that in the input sequence amino acids N,Q will be mapped into simbol 8.</a></TD>
+                </TR>
+                <TR ALIGN="LEFT">
+                    <TD style="padding: 0 35px; vertical-align:top;"><a> <i>-aliphatic</i></a></TD>
+                    <TD style="padding: 0 15px;"><a> Specifies that in the input sequence amino acids I,V,L will be mapped into simbol 0. </a></TD>
+                </TR>
+                <TR ALIGN="LEFT">
+                    <TD style="padding: 0 35px; vertical-align:top;"><a> <i>-aromatic</i></a></TD>
+                    <TD style="padding: 0 15px;"><a> Specifies that in the input sequence amino acids F,Y,W,H will be mapped into simbol 3.</a></TD>
+                </TR>
+                <TR ALIGN="LEFT">
+                    <TD style="padding: 0 35px; vertical-align:top;"><a> <i>-charged</i></a></TD>
+                    <TD style="padding: 0 15px;"><a> Specifies that in the input sequence amino acids D,E,H,K,R will be mapped into simbol 5. </a></TD>
+                </TR>
+                <TR ALIGN="LEFT">
+                    <TD style="padding: 0 35px; vertical-align:top;"><a> <i>-hydrophobic</i></a></TD>
+                    <TD style="padding: 0 15px;"><a> Specifies that in the input sequence amino acids A,C,T,K,H,W,Y,F,M,I,L,V will be mapped into simbol 4. </a></TD>
+                </TR>
+                <TR ALIGN="LEFT">
+                    <TD style="padding: 0 35px; vertical-align:top;"><a> <i>-hydroxylic</i></a></TD>
+                    <TD style="padding: 0 15px;"><a> Specifies that in the input sequence amino acids S,T will be mapped into simbol @. </a></TD>
+                </TR>
+                <TR ALIGN="LEFT">
+                    <TD style="padding: 0 35px; vertical-align:top;"><a> <i>-polar</i></a></TD>
+                    <TD style="padding: 0 15px;"><a> Specifies that in the input sequence amino acids N,Q,S,T,C,D,E,H,K,R,Y,W will be mapped into simbol 7. </a></TD>
+                </TR>
+                <TR ALIGN="LEFT">
+                    <TD style="padding: 0 35px; vertical-align:top;"><a> <i>-positive</i></a></TD>
+                    <TD style="padding: 0 15px;"><a> Specifies that in the input sequence amino acids H,K,R will be mapped into simbol 6. </a></TD>
+                </TR>
+
+
+                <TR ALIGN="LEFT">
+                    <TD style="padding: 0 35px; vertical-align:top;"><a> <i>-small</i></a></TD>
+                    <TD style="padding: 0 15px;"><a> Specifies that in the input sequence amino acids V,P,A,G,C,T,S,D,N will be mapped into simbol 9. </a></TD>
+                </TR>
+                <TR ALIGN="LEFT">
+                    <TD style="padding: 0 35px; vertical-align:top;"><a> <i>-sulphur</i></a></TD>
+                    <TD style="padding: 0 15px;"><a> Specifies that in the input sequence amino acids M,C will be mapped into simbol 1.</a></TD>
+                </TR>
+                <TR ALIGN="LEFT">
+                    <TD style="padding: 0 35px; vertical-align:top;"><a> <i>-tiny</i></a></TD>
+                    <TD style="padding: 0 15px;"><a> Specifies that in the input sequence amino acids A,G,C,S will be mapped into simbol 2.</a></TD>
+                </TR>
+
+
+
+
+
+
+            </TABLE>
+            <p></p>
+
+            Example:  <a href="./examples/examples2/example_6/example_6.txt">Options -dna, -rna, -compl</a>&nbsp;&nbsp;<a href="./examples/examples2/example_5/">
+    <p></p>
+    <a href="./examples/examples2/example_7/example_7.txt">Options -exclude, -proteins, -msr, -maxgap</a>&nbsp;&nbsp;<a href="./examples/examples2/example_6/">
+        <p></p>
+        <a href="./examples/examples2/example_8/example_8.txt">Options -proteins -aromatic -aliphatic -charged -tiny</a>&nbsp;&nbsp;<a href="./examples/examples2/example_7/">
+            <p><br></p>
+        </a>
+
+        <h2 id="download">Download</h2>
+        <p>
+            Source code of Repeats can be download from site
+            Bioinformatics Research Group at Faculty of Mathematics, University of Belgrade.
+    </a>
+    <br>
+    Distribution directory includes precompiled version for 64 bit Linux (Ubuntu), 64-bit Windows and license (RepeatsPPlus) file. Suffix in program name denotes curent version and release (for example, RepeatsPlus.v1.r1).
+
+
+    <h2 id="setup">Setup Instructions</h2>
+
+    <h3 id="linux">Linux</h3>
+    <p>To compile <i>Repeats</i> execute the following command in the directory where you unpacked the archive:</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;<i> ./Repeats.compile.sh</i></p>
+    <p>This command produces the <i>Repeats.version.release</i> binaries. In order for the above command to succeed you will need gcc 4.8.4 or later.</p>
+
+    <h3 id="windows">Windows</h3>
+    <p>
+        Repeats executable version (<i>Repeats.version.release.exe</i>) is provided in this archive. You will need to install the Visual C++ 2019 runtime in order to run it. It can be downloaded from
+        <a href="https://visualstudio.microsoft.com/downloads/?utm_medium=post-banner&utm_source=microsoft.com&utm_campaign=channel+banner&utm_content=launch+vs2019&icid=mscom_marcom_dlc">Microsoft site</a>.
+    </p>
+    <p> To compile from source you will need the free Visual Studio 2019 Community Edition. Open RepeatsPlus.sln which is included in the archive and build the solution.</p>
+
+</body>
+</html>
+

@@ -1,0 +1,33 @@
+Preliminary steps to use direct access to relational database from StatRepeats program 
+(all examples are prepared for IBM DB2)
+
+Step 1. Create database (in example database name is RIPITI). Sql for creating database is in crdb.ripiti.sql 
+
+Step 2. Create tables for storing repeats in database. Sql: crttables.sql
+
+Step 3: Create stored procedure. Sql: crtstoredprocedure.sql  (execute from command line: db2 -td@ -f crtstoredprocedure.sql)
+
+Step 4. Create procedure. Sql: crtspsequence.sql   (execute from command line: db2 -td@ -f crtspsequence.sql)
+        
+
+1. Insert to the database RIPITI direct non-complementary repeats with minimal length 10 from Zaire ebolavirus</a> isolate Ebola virus/H.sapiens-tc/COD/1976/Yambuku-Mayinga nucleotide sequence (NCBI id NC_002549) 
+
+
+Input file : NC_002549.fasta
+
+(Windows version)
+
+a) Syntax:      ./StatRepeats NC_002549.fasta 10 -DB2 "Driver={IBM DB2 ODBC DRIVER};Database=RIPITI;Hostname=localhost;Port=50000;Protocol=TCPIP;Uid=user;Pwd=password;"
+Output file: standard output (screen)
+
+b) Syntax: 
+Syntax:      ./StatRepeats NC_002549.fasta 10 -dat "Driver={IBM DB2 ODBC DRIVER};Database=RIPITI;Hostname=localhost;Port=50000;Protocol=TCPIP;Uid=user;Pwd=password;"
+
+
+2. Insert to the database RIPITI direct non-complementary repeats with minimal length 3 from Tomato yellow leaf curl Thailand virus DNA B proteins. 
+
+Input file : NC_000870.faa
+
+(Windows version) If ODBC data sources with RIPITI was created using ODBC data sources option, then the following command syntax can be used: 
+
+Syntax:      ./StatRepeats NC_002549.fasta 3 -db2output "DSN=RIPITI;"

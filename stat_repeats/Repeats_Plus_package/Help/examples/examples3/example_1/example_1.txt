@@ -1,0 +1,9 @@
+Example 1. Draw repeats from file inputResults.load and make latex file named output.tex. Drawing only repeats from position 10 to position 10000 in the input sequence.
+The load file is the result of program StatRepeats or Repeats with output option -load.
+
+
+
+Input file : inputResults.load
+Syntax:      ./DrawRepeats inputResultsesults.load output.tex 10 10000
+Output file: ouput.tex
+Pdf file made from latex file: output.pdf

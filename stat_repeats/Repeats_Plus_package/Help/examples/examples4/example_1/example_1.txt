@@ -1,0 +1,25 @@
+Finding different motifs in Zaire ebolavirus isolate Ebola virus/H.sapiens-tc/COD/1976/Yambuku-Mayinga, complete genome (NCBI id  NC_002549.fasta).
+
+a) Looking for motifs that satisfy motif mask ACTGAC 
+
+Input file  : NC_002549.fasta
+Syntax:      ./MotifSearch NC_002549.fasta -motif ACTGAC
+Output file: standard output (screen)
+
+b) Looking for motifs that satisfy motif mask ACT.GAC
+
+Input file  : NC_002549.fasta
+Syntax:      ./MotifSearch NC_002549.fasta -motif ACT.GAC
+Output file: standard output (screen)
+
+c) Looking for motifs that satisfy motif mask AC[AC]GAC
+
+Input file  : NC_002549.fasta
+Syntax:      ./MotifSearch NC_002549.fasta -motif AC[AC]GAC
+Output file: standard output (screen)
+
+d) Looking for motifs that satisfy motif mask AC[^AC]GAC
+
+Input file  : NC_002549.fasta
+Syntax:      ./MotifSearch NC_002549.fasta -motif AC[^AC]GAC
+Output file: standard output (screen)
