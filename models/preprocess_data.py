@@ -1,10 +1,14 @@
 import pandas as pd
+import numpy as np
 
 from typing import List, Optional, Tuple
+from dataclasses import dataclass
+
+from sklearn.base import BaseEstimator, TransformerMixin
 
 COLUMNS_TO_DROP = ["left_end", "right_end", "left_start", "right_start", "sequence_id", "length", "protein_name", "repeat_type"]
 
-def prepare_data(
+def preprocess_data(
         data: str | pd.DataFrame, 
         seed: int, 
         train_size: Optional[float] = None, 
@@ -94,6 +98,39 @@ def prepare_data(
 
     return train_data, valid_data, test_data
 
+@dataclass
+class Metrics:
+    accuracy: float
+    precision: float
+    recall: float
+    f1: float
+    confusion_matrix: np.ndarray
+
+AMINO_ACIDS = ["A","R","N","D","C","Q","E","G","H","I","L","K","M","F","P","S","T","W","Y","V"]
+PAD = "_"
+CATS_21 = AMINO_ACIDS + [PAD]
+
+class PositionalEncoder(BaseEstimator, TransformerMixin):
+    def __init__(self, col_name: str = "repeat", width: int = 7, pad_char: str = PAD):
+        self.col_name = col_name
+        self.width = width
+        self.pad_char = pad_char
+
+    def fit(self, X, y = None):
+        return self
+    
+    def transform(self, X):
+        s = X[self.col_name].astype(str).values
+        out = []
+
+        for seq in s:
+            seq = seq[-self.width : ]
+            seq = (self.pad_char * (self.width - len(seq))) + seq
+            out.append(list(seq))
+
+        cols = [f"p{i + 1}" for i in range(self.width)]
+        return pd.DataFrame(out, columns = cols)
+
 if __name__ == "__main__":
     data_path = "proteins/data/virus_protein_repeats.csv"
     seed = 561
@@ -101,7 +138,7 @@ if __name__ == "__main__":
     valid_size = None
     test_size = None
     columns_to_drop = ["left_end", "right_end", "left_start", "right_start", "sequence_id", "length", "protein_name", "repeat_type"]
-    train, valid, test = prepare_data(data_path, seed, train_size, valid_size, test_size)
+    train, valid, test = preprocess_data(data_path, seed, train_size, valid_size, test_size)
     print(train)
     print(valid)
     print(test)

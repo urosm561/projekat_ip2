@@ -8,7 +8,7 @@ from sklearn.decomposition import PCA
 from collections import Counter
 from matplotlib import pyplot as plt
 
-from data_split import prepare_data
+from models.preprocess_data import preprocess_data
 
 all_kmers = ["".join(p) for p in itertools.product(list("ACDEFGHIKLMNPQRSTVWY"), repeat = 2)]
 
@@ -22,5 +22,5 @@ def extract_kmers(seq, k = 2):
 SEED = 561
 data_path = "proteins/data/virus_protein_repeats.csv"
 
-train_data, valid_data, test_data = prepare_data(data = data_path, seed = SEED, train_size = 0.8, test_size = 0.2)
+train_data, valid_data, test_data = preprocess_data(data = data_path, seed = SEED, train_size = 0.8, test_size = 0.2)
 print(train_data)

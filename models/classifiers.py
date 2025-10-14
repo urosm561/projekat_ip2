@@ -1,4 +1,4 @@
-from models.data_split import prepare_data
+from models.preprocess_data import preprocess_data
 from utils.embeddings import protvec_encode_repeat
 
 from sklearn.preprocessing import LabelEncoder
@@ -24,7 +24,7 @@ class RepeatDataset(Dataset):
 
 SEED = 561
 
-train, valid, test = prepare_data(data = "proteins/data/virus_protein_repeats.csv", seed = SEED)
+train, valid, test = preprocess_data(data = "proteins/data/virus_protein_repeats.csv", seed = SEED)
 X_train = np.array([protvec_encode_repeat(repeat) for repeat in train["repeat"]])
 
 le = LabelEncoder()
