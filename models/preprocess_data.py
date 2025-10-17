@@ -6,6 +6,10 @@ from dataclasses import dataclass
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+
+from imblearn.over_sampling import RandomOverSampler
+from imblearn.under_sampling import RandomUnderSampler
 
 COLUMNS_TO_DROP = ["left_end", "right_end", "left_start", "right_start", "sequence_id", "length", "protein_name", "repeat_type"]
 
@@ -15,7 +19,7 @@ def preprocess_data(
         train_size: Optional[float] = None, 
         valid_size: Optional[float] = None, 
         test_size: Optional[float] = None,
-        columns_to_drop: List[str] = COLUMNS_TO_DROP 
+        columns_to_drop: List[str] = COLUMNS_TO_DROP
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Prepares the data by dropping `columns_to_drop`, and splitting
@@ -102,6 +106,24 @@ def preprocess_data(
 
     return train_data, valid_data, test_data
 
+def rebalance_data(data: pd.DataFrame, seed: int, strategy: str = "over"):
+    X = data[["repeat"]]
+    y = data["virus_name"]
+
+    if strategy == "over":
+        ros = RandomOverSampler(random_state = seed)
+        Xr, yr = ros.fit_resample(X, y)
+    elif strategy == "under":
+        rus = RandomUnderSampler(random_state = seed)
+        Xr, yr = rus.fit_resample(X, y)
+    else:
+        return data
+    
+    out = pd.concat([Xr, yr], axis = 1)
+    out.columns = ["repeat", "virus_name"]
+
+    return out
+
 @dataclass
 class Metrics:
     accuracy: float
@@ -123,10 +145,19 @@ class Metrics:
             f"  f1          : {self.f1:.4f}\n\n"
             f"  confusion_matrix:\n{cm_str}"
         )
+    
+def calculate_metrics(y_test, y_pred) -> Metrics:
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred, average = "weighted")
+    recall = recall_score(y_test, y_pred, average = "weighted")
+    f1 = f1_score(y_test, y_pred, average = "weighted")
+    cm = confusion_matrix(y_test, y_pred, labels = VIRUS_NAMES)
+
+    return Metrics(accuracy, precision, recall, f1, cm)
 
 AMINO_ACIDS = ["A","R","N","D","C","Q","E","G","H","I","L","K","M","F","P","S","T","W","Y","V"]
 PAD = "_"
-CATS_21 = AMINO_ACIDS + [PAD]
+ALPHABET = AMINO_ACIDS + [PAD]
 VIRUS_NAMES = ["BCOV", "BAT_SARS", "MERS", "SARS1"]
 
 class PositionalEncoder(BaseEstimator, TransformerMixin):

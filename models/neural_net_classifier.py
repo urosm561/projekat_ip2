@@ -11,12 +11,17 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 
-from preprocess_data import preprocess_data, PositionalEncoder, CATS_21, Metrics, VIRUS_NAMES
+from preprocess_data import preprocess_data, PositionalEncoder, ALPHABET, Metrics, VIRUS_NAMES, calculate_metrics, rebalance_data
 
 class SimpleMLP(nn.Module):
-    def __init__(self, in_dim: int, num_classes: int, p_drop: float = 0.1):
+    def __init__(
+            self, 
+            in_dim: int, 
+            num_classes: int, 
+            p_drop: float = 0.1
+    ):
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(in_dim, 256),
@@ -31,23 +36,39 @@ class SimpleMLP(nn.Module):
             nn.Linear(64, num_classes)
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(
+            self, 
+            x: torch.Tensor
+    ) -> torch.Tensor:
         return self.net(x)
 
-def class_weights_from_train(y: np.ndarray, VIRUS_NAMES: List[str]) -> torch.Tensor:
+def class_weights_from_train(
+        y: np.ndarray, 
+        VIRUS_NAMES: List[str]
+) -> torch.Tensor:
+    """Calculate the class weights, because the classes are heavily imbalanced."""
     counts = pd.Series(y).value_counts().reindex(VIRUS_NAMES).fillna(0).astype(int)
     inv = 1.0 / counts.replace(0, np.nan)
     inv = inv / inv.max()
     inv = inv.fillna(0.0)
     return torch.tensor(inv.values, dtype=torch.float32)
 
-def build_features(train_df: pd.DataFrame, test_df: pd.DataFrame, max_aa_length: int = 7):
+def build_features(
+        train_data: pd.DataFrame, 
+        test_data: pd.DataFrame, 
+        max_aa_length: int = 7
+):
+    """
+    Prepare the data by positionally encoding amino acids up to the `max_aa_length`,
+    and then one-hot encoding these columns. We get `max_aa_length` x 21 columns.
+    """
     pos = PositionalEncoder(width = max_aa_length)
     ohe = OneHotEncoder(
-        categories = [CATS_21] * max_aa_length,
+        categories = [ALPHABET] * max_aa_length,
         handle_unknown = "error",
         sparse_output = False
     )
+
     prep = Pipeline([
         ("pos", pos),
         ("ohe", ColumnTransformer(
@@ -55,32 +76,60 @@ def build_features(train_df: pd.DataFrame, test_df: pd.DataFrame, max_aa_length:
             remainder = "drop"
         ))
     ])
-    X_train = prep.fit_transform(train_df[["repeat"]])
-    X_test = prep.transform(test_df[["repeat"]])
+
+    X_train = prep.fit_transform(train_data[["repeat"]])
+    X_test = prep.transform(test_data[["repeat"]])
+
     return X_train.astype(np.float32), X_test.astype(np.float32)
 
-def encode_labels(train_df: pd.DataFrame, test_df: pd.DataFrame, target_col: str) -> Tuple[np.ndarray, np.ndarray, List[str], Dict[str,int]]:
+def encode_labels(
+        train_data: pd.DataFrame, 
+        test_data: pd.DataFrame, 
+        target_col: str
+) -> Tuple[np.ndarray, np.ndarray, List[str], Dict[str,int]]:
+    """
+    Encode the labels in the simplest possible way.
+    """
     class2idx = {c: i for i, c in enumerate(VIRUS_NAMES)}
-    y_train = train_df[target_col].astype(str).map(class2idx).values
-    y_test = test_df[target_col].astype(str).map(class2idx).values
+    y_train = train_data[target_col].astype(str).map(class2idx).values
+    y_test = test_data[target_col].astype(str).map(class2idx).values
     return y_train, y_test
 
-def train_simple_nn_classifier(
-    train_df: pd.DataFrame,
-    test_df: pd.DataFrame,
+def train_nn_classifier(
+    train_data: pd.DataFrame,
+    test_data: pd.DataFrame,
     seed: int,
     max_aa_length: int = 7,
+    resample_strategy: Optional[str] = None,
     batch_size: int = 1024,
     lr: float = 1e-3,
     epochs: int = 20,
     p_drop: float = 0.1,
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
 ) -> Tuple[nn.Module, Metrics]:
+    """
+    Train the neural network and then evaluate it.
+
+    Args:
+        train_data (pd.DataFrame): Data to train the nn on.
+        test_data (pd.DataFrame): Data to evaluate the nn on.
+        seed (int): Control randomness.
+        max_aa_length (int, optional): Maximum allowed number of amino acids in a repeat. Defaults to 7.
+        batch_size (int, optional): Batch size for the DataLoaders. Defaults to 1024.
+        lr (float, optional): Learning rate for the Adam optimizer. Defaults to 1e-3.
+        epochs (int, optional): Number of epochs for training. Defaults to 20.
+        p_drop (float, optional): Dropout parameter. Defaults to 0.1.
+        device (str, optional): torch device.
+
+    Returns:
+        Tuple[nn.Module, Metrics]: Trained network and all the relevant metrics.
+    """
     torch.manual_seed(seed)
     np.random.seed(seed)
+    train_data = rebalance_data(train_data, seed = seed, strategy = resample_strategy)
 
-    X_train, X_test = build_features(train_df, test_df, max_aa_length=max_aa_length)
-    y_train, y_test = encode_labels(train_df, test_df, target_col="virus_name")
+    X_train, X_test = build_features(train_data, test_data, max_aa_length=max_aa_length)
+    y_train, y_test = encode_labels(train_data, test_data, target_col="virus_name")
 
     in_dim = X_train.shape[1]
     num_classes = len(VIRUS_NAMES)
@@ -94,7 +143,7 @@ def train_simple_nn_classifier(
     test_loader  = DataLoader(TensorDataset(Xte, yte), batch_size=batch_size, shuffle=False)
 
     model = SimpleMLP(in_dim=in_dim, num_classes=num_classes, p_drop=p_drop).to(device)
-    weights = class_weights_from_train(train_df["virus_name"].astype(str).values, VIRUS_NAMES).to(device)
+    weights = class_weights_from_train(train_data["virus_name"].astype(str).values, VIRUS_NAMES).to(device)
     criterion = nn.CrossEntropyLoss(weight = weights)
     opt = torch.optim.AdamW(model.parameters(), lr = lr)
 
@@ -120,15 +169,14 @@ def train_simple_nn_classifier(
             trues.append(yb.numpy())
 
     y_pred = np.concatenate(preds)
-    y_true = np.concatenate(trues)
+    y_test = np.concatenate(trues)
 
-    accuracy = accuracy_score(y_true, y_pred)
-    precision = precision_score(y_true, y_pred, average = "weighted", zero_division=0)
-    recall  = recall_score(y_true, y_pred, average = "weighted", zero_division=0)
-    f1 = f1_score(y_true, y_pred, average = "weighted", zero_division=0)
-    cm = confusion_matrix(y_true, y_pred, labels = list(range(num_classes)))
+    y_pred = [VIRUS_NAMES[i] for i in y_pred.tolist()]
+    y_test = [VIRUS_NAMES[i] for i in y_test.tolist()]
 
-    return model, Metrics(accuracy, precision, recall, f1, cm)
+    metrics = calculate_metrics(y_test, y_pred)
+
+    return model, metrics
 
 if __name__ == "__main__":
     data_path = "proteins/data/virus_protein_repeats.csv"
@@ -139,7 +187,7 @@ if __name__ == "__main__":
     columns_to_drop = ["left_end", "right_end", "left_start", "right_start", "sequence_id", "length", "protein_name", "repeat_type"]
     train, _, test = preprocess_data(data_path, seed, train_size, valid_size, test_size)
 
-    model, metrics = train_simple_nn_classifier(train, test, seed)
+    model, metrics = train_nn_classifier(train, test, seed, resample_strategy = "under")
 
     print(metrics)
 
