@@ -5,10 +5,13 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
+from typing import Tuple    
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-from preprocess_data import preprocess_data, Metrics, PositionalEncoder, AMINO_ACIDS, PAD, CATS_21
+from preprocess_data import preprocess_data, Metrics, PositionalEncoder, CATS_21, VIRUS_NAMES
 
-def rf_classify(train_data: pd.DataFrame, test_data: pd.DataFrame, seed: int, max_aa_length: int = 7) -> Metrics:
+def rf_classify(train_data: pd.DataFrame, test_data: pd.DataFrame, seed: int, max_aa_length: int = 7) -> Tuple[Pipeline, Metrics]:
     X_train = train_data[["repeat"]]
     y_train = train_data["virus_name"]
     X_test = test_data[["repeat"]]
@@ -33,7 +36,9 @@ def rf_classify(train_data: pd.DataFrame, test_data: pd.DataFrame, seed: int, ma
         n_estimators = 200,
         max_depth = None,
         random_state = seed,
-        criterion = "gini"
+        criterion = "gini",
+        class_weight = "balanced_subsample",
+        n_jobs = -1
     )
 
     pipe = Pipeline([
@@ -48,9 +53,9 @@ def rf_classify(train_data: pd.DataFrame, test_data: pd.DataFrame, seed: int, ma
     precision = precision_score(y_test, y_pred, average = "weighted")
     recall = recall_score(y_test, y_pred, average = "weighted")
     f1 = f1_score(y_test, y_pred, average = "weighted")
-    cm = confusion_matrix(y_test, y_pred)
+    cm = confusion_matrix(y_test, y_pred, labels = VIRUS_NAMES)
 
-    return Metrics(accuracy, precision, recall, f1, cm)
+    return pipe, Metrics(accuracy, precision, recall, f1, cm)
 
 if __name__ == "__main__":
     data_path = "proteins/data/virus_protein_repeats.csv"
@@ -59,14 +64,14 @@ if __name__ == "__main__":
     valid_size = 0
     test_size = 0.2
     columns_to_drop = ["left_end", "right_end", "left_start", "right_start", "sequence_id", "length", "protein_name", "repeat_type"]
-    train, valid, test = preprocess_data(data_path, seed, train_size, valid_size, test_size)
+    train, _, test = preprocess_data(data_path, seed, train_size, valid_size, test_size)
 
-    metrics = rf_classify(train, test, seed)
+    model, metrics = rf_classify(train, test, seed)
 
-    import seaborn as sns
-    import matplotlib.pyplot as plt
+    print(metrics)
 
-    sns.heatmap(metrics.confusion_matrix, annot=True, fmt='d', cmap='inferno')
+    sns.heatmap(metrics.confusion_matrix, annot=True, fmt='d', cmap='inferno', 
+                xticklabels = VIRUS_NAMES, yticklabels = VIRUS_NAMES)
     plt.xlabel('Predicted')
     plt.ylabel('True')
     plt.show()

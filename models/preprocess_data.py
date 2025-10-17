@@ -5,6 +5,7 @@ from typing import List, Optional, Tuple
 from dataclasses import dataclass
 
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.model_selection import train_test_split
 
 COLUMNS_TO_DROP = ["left_end", "right_end", "left_start", "right_start", "sequence_id", "length", "protein_name", "repeat_type"]
 
@@ -90,11 +91,14 @@ def preprocess_data(
     data = data[new_order]
 
     # Split the data into train, validation and test datasets.
-    train_data = data.sample(frac = train_size, random_state = seed)
-    valid_test_data = data.drop(train_data.index)
+    train_valid_data, test_data = train_test_split(data, test_size = test_size, random_state = seed, stratify = data["virus_name"])
 
-    valid_data = valid_test_data.sample(frac = valid_size / (valid_size + test_size), random_state = seed)
-    test_data = valid_test_data.drop(valid_data.index)
+    if valid_size > 0:
+        valid_ratio = valid_size / (valid_size + train_size)
+        train_data, valid_data = train_test_split(train_valid_data, test_size = valid_ratio, random_state = seed, stratify = train_valid_data["virus_name"])
+    else:
+        valid_data = train_valid_data.iloc[0:0]
+        train_data = train_valid_data
 
     return train_data, valid_data, test_data
 
@@ -106,9 +110,24 @@ class Metrics:
     f1: float
     confusion_matrix: np.ndarray
 
+    def __str__(self) -> str:
+        cm = np.asarray(self.confusion_matrix, dtype = int)
+        lines = [" ".join(f"{v:5d}" for v in row) for row in cm]
+        cm_str = "\n".join(lines)
+
+        return (
+            "Metrics:\n\n"
+            f"  accuracy    : {self.accuracy:.4f}\n"
+            f"  precision   : {self.precision:.4f}\n"
+            f"  recall      : {self.recall:.4f}\n"
+            f"  f1          : {self.f1:.4f}\n\n"
+            f"  confusion_matrix:\n{cm_str}"
+        )
+
 AMINO_ACIDS = ["A","R","N","D","C","Q","E","G","H","I","L","K","M","F","P","S","T","W","Y","V"]
 PAD = "_"
 CATS_21 = AMINO_ACIDS + [PAD]
+VIRUS_NAMES = ["BCOV", "BAT_SARS", "MERS", "SARS1"]
 
 class PositionalEncoder(BaseEstimator, TransformerMixin):
     def __init__(self, col_name: str = "repeat", width: int = 7, pad_char: str = PAD):
@@ -132,13 +151,19 @@ class PositionalEncoder(BaseEstimator, TransformerMixin):
         return pd.DataFrame(out, columns = cols)
 
 if __name__ == "__main__":
-    data_path = "proteins/data/virus_protein_repeats.csv"
-    seed = 561
-    train_size = None
-    valid_size = None
-    test_size = None
-    columns_to_drop = ["left_end", "right_end", "left_start", "right_start", "sequence_id", "length", "protein_name", "repeat_type"]
-    train, valid, test = preprocess_data(data_path, seed, train_size, valid_size, test_size)
-    print(train)
-    print(valid)
-    print(test)
+    # data_path = "proteins/data/virus_protein_repeats.csv"
+    # seed = 561
+    # train_size = 0.8
+    # valid_size = 0
+    # test_size = 0.2
+    # columns_to_drop = ["left_end", "right_end", "left_start", "right_start", "sequence_id", "length", "protein_name", "repeat_type"]
+    # train, valid, test = preprocess_data(data_path, seed, train_size, valid_size, test_size)
+    # print(train["virus_name"].value_counts())
+    # print(valid["virus_name"].value_counts())
+    # print(test["virus_name"].value_counts())
+
+    df = pd.DataFrame({"repeat": ["ANQ"]})
+    pos = PositionalEncoder(width = 7)
+
+    df = pos.transform(df)
+    print(df)
