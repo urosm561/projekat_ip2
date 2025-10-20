@@ -1,0 +1,24 @@
+Association rules results
+
+Seed: 561
+
+Best parameters
+max_aa_length            7
+min_confidence         0.7
+min_lift               1.3
+min_support          0.001
+min_antecedents          2
+max_antecedents          6
+resample_strategy    under
+
+Model metrics
+accuracy  : 0.811585790573485
+precision : 0.9099927241676381
+recall    : 0.811585790573485
+f1        : 0.8489833261547918
+
+Confusion matrix
+ 2099   410   123    37
+    3   238    20    30
+  200   658  4629     0
+    1   132     9    25
