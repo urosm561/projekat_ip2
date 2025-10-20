@@ -1,8 +1,0 @@
-Finding ACT.GAC motifs in Zaire ebolavirus isolate Ebola virus/H.sapiens-tc/COD/1976/Yambuku-Mayinga, complete genome (NCBI id  NC_002549.fasta). and writing
-output to file NC_002549.ACT.GAC.out
-
-Input file  : NC_002549.fasta
-Syntax:      ./MotifSearch NC_002549.fasta -motif ACT.GAC -output NC_002549.ACT.GAC.out
-Output file: NC_002549.ACT.GAC.out
-
-
