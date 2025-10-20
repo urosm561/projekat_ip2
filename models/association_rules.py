@@ -2,10 +2,9 @@ import pandas as pd
 
 from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import fpgrowth, association_rules
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
-from matplotlib import pyplot as plt
+from typing import Tuple
 
-from preprocess_data import preprocess_data, PositionalEncoder, PAD, Metrics, VIRUS_NAMES, calculate_metrics
+from preprocess_data import preprocess_data, PositionalEncoder, Metrics, PAD, calculate_metrics, split_into_proteins, rebalance_data, log_training
 
 def ngrams(s: str, n: int):
     return {s[i : i + n] for i in range(len(s) - n + 1)} if len(s) >= n else set()
@@ -57,16 +56,26 @@ def train_ar_classifier(
         min_lift: float = 1.3, 
         min_support: float = 0.001, 
         min_antecedents: int = 2, 
-        max_antecedents: int = 6
-):
+        max_antecedents: int = 6,
+        resample_strategy: str = None,
+        results_folder: str = "results"
+) -> Tuple[pd.DataFrame, Metrics]:
+    train_data = rebalance_data(train_data, seed = seed, strategy = resample_strategy)
     item_set_df = build_transactions(train_data, max_aa_length)
+    print(train_data)
 
+    print("a")
     sets = fpgrowth(item_set_df, min_support = min_support, use_colnames = True, max_len = max_antecedents, verbose = 0)
+    print("b")
     rules = association_rules(sets, metric = "confidence", min_threshold = min_confidence)
-
+    print("c")
+    
     rules = rules[rules["consequents"].apply(lambda s: len(s) == 1 and next(iter(s)).startswith("VIRUS="))]
+    print("d")
     rules = rules[rules["antecedents"].apply(len) >= min_antecedents]
+    print("e")
     rules = rules[rules["lift"] >= min_lift].sort_values(["lift", "confidence", "support"], ascending = False)
+    print("f")
 
     print(rules["consequents"].value_counts())
 
@@ -96,15 +105,32 @@ def train_ar_classifier(
 
     metrics = calculate_metrics(y_test, y_pred)
 
+    params = {
+        "max_aa_length": max_aa_length, 
+        "min_confidence": min_confidence, 
+        "min_lift": min_lift, 
+        "min_support": min_support, 
+        "min_antecedents": min_antecedents, 
+        "max_antecedents": max_antecedents,
+        "resample_strategy": resample_strategy
+    }
+
+    log_training(results_folder, "ar", pd.DataFrame(), params, metrics, seed)
+
     return rules, metrics
 
 if __name__ == "__main__":
-    SEED = 561
+    seed = 561
     data_path = "proteins/data/virus_protein_repeats.csv"
+    train_size = 0.8
+    valid_size = 0
+    test_size = 0.2
 
-    train_data, valid_data, test_data = preprocess_data(data = data_path, seed = SEED, train_size = 0.8, test_size = 0.2)
-    print(train_data)
-    rules, metrics = train_ar_classifier(train_data, test_data, seed = 561)
+    spike_data, nucleocapsid_data = split_into_proteins(data_path)
 
-    print(rules)
-    print(metrics)
+    train_spike, valid_spike, test_spike = preprocess_data(spike_data, seed, train_size, valid_size, test_size)
+    train_nucleocapsid, valid_nucleocapsid, test_nucleocapsid = preprocess_data(nucleocapsid_data, seed, train_size, valid_size, test_size)
+    
+    rules, metrics = train_ar_classifier(train_spike, test_spike, seed = 561, results_folder = "results/spike", resample_strategy = "under")
+    rules, metrics = train_ar_classifier(train_nucleocapsid, test_nucleocapsid, seed = 561, results_folder = "results/nucleocapsid", resample_strategy = "under")
+    

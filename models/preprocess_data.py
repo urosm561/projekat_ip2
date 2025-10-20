@@ -1,8 +1,10 @@
 import pandas as pd
 import numpy as np
+import os
 
 from typing import List, Optional, Tuple
 from dataclasses import dataclass
+from datetime import datetime
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.model_selection import train_test_split
@@ -13,13 +15,28 @@ from imblearn.under_sampling import RandomUnderSampler
 
 COLUMNS_TO_DROP = ["left_end", "right_end", "left_start", "right_start", "sequence_id", "length", "protein_name", "repeat_type"]
 
+def split_into_proteins(data: str | pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    if isinstance(data, str):
+        data = pd.read_csv(data)
+    elif not isinstance(data, pd.DataFrame):
+        raise ValueError("data type is wrong!")
+    
+    groups = [g.reset_index(drop = True) for _, g in data.groupby("protein_name", sort = False)]
+    a, b = groups[0], groups[1]
+    name_a = str(a.at[0, "protein_name"])
+
+    if name_a == "nucleocapsid protein":
+        return b, a
+    return a, b
+
 def preprocess_data(
         data: str | pd.DataFrame, 
         seed: int, 
         train_size: Optional[float] = None, 
         valid_size: Optional[float] = None, 
         test_size: Optional[float] = None,
-        columns_to_drop: List[str] = COLUMNS_TO_DROP
+        columns_to_drop: List[str] = COLUMNS_TO_DROP,
+        repeat_side: Optional[str] = "left"
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Prepares the data by dropping `columns_to_drop`, and splitting
@@ -30,6 +47,9 @@ def preprocess_data(
 
     # Various checks for split sizes.
     eps = 1e-5
+
+    if "left_repeat" in columns_to_drop or "right_repeat" in columns_to_drop:
+        raise ValueError("Can't drop repeats!")
 
     if not train_size and not valid_size and not test_size:
         train_size = 0.7
@@ -74,20 +94,10 @@ def preprocess_data(
     # Dropping columns.
     data.drop(columns = columns_to_drop, inplace = True)
 
-    # Cleaning up the repeats, we don't need both the left and right ones.
-    if "left_repeat" in data.columns and "right_repeat" in data.columns:
-        data.drop(columns = ["right_repeat"], inplace = True)
-    
-    # Make sure not to drop all the repeats and virus types as that is necessary for the models.
-    if (("left_repeat" not in data.columns and "right_repeat" not in data.columns)
-        or "virus_name" not in data.columns):
-        print(data)
-        raise ValueError("Removed important data from the dataframe.")
-
-    # Since we now have only one repeat in the data we rename it.
-    repeats_column_name = "left_repeat" if "left_repeat" in data.columns else "right_repeat"
-    data["repeat"] = data[repeats_column_name]
-    data.drop(columns = [repeats_column_name], inplace = True)
+    # Save just one repeat.
+    repeat_column = repeat_side + "_repeat" if repeat_side else "left_repeat"
+    data["repeat"] = data[repeat_column]
+    data.drop(columns = ["left_repeat", "right_repeat"], inplace = True)
 
     # Reorder columns so that the repeat is at the beginning and virus type is at the end.
     middle_cols = [col for col in data.columns if col not in ["repeat", "virus_name"]]
@@ -155,6 +165,33 @@ def calculate_metrics(y_test, y_pred) -> Metrics:
 
     return Metrics(accuracy, precision, recall, f1, cm)
 
+def log_training(results_folder: str, model_name: str, leaderboard: pd.DataFrame, best_val_params, metrics, seed):
+    os.makedirs(results_folder, exist_ok = True)
+    ts = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+    path = os.path.join(results_folder, f"{model_name}_report_{ts}.results")
+
+    if model_name == "rf": model_name = "Random forest"
+    elif model_name == "nn": model_name = "Neural network"
+    elif model_name == "ar": model_name = "Association rules"
+    else: return
+
+    with open(path, "w", encoding = "utf-8") as f:
+        f.write(f"{model_name} results\n")
+        f.write("\n")
+        f.write(f"Seed: {seed}\n\n")
+        if not leaderboard.empty:
+            f.write("Validation leaderboard\n")
+            f.write(leaderboard.to_string(index = False) + "\n\n")
+        f.write("Best parameters\n")
+        f.write(pd.Series(best_val_params).to_string() + "\n\n")
+        f.write("Model metrics\n")
+        f.write(f"accuracy  : {metrics.accuracy}\n")
+        f.write(f"precision : {metrics.precision}\n")
+        f.write(f"recall    : {metrics.recall}\n")
+        f.write(f"f1        : {metrics.f1}\n\n")
+        f.write("Confusion matrix\n")
+        f.write(str(metrics).split("confusion_matrix:\n", -1)[-1])
+
 AMINO_ACIDS = ["A","R","N","D","C","Q","E","G","H","I","L","K","M","F","P","S","T","W","Y","V"]
 PAD = "_"
 ALPHABET = AMINO_ACIDS + [PAD]
@@ -182,7 +219,7 @@ class PositionalEncoder(BaseEstimator, TransformerMixin):
         return pd.DataFrame(out, columns = cols)
 
 if __name__ == "__main__":
-    # data_path = "proteins/data/virus_protein_repeats.csv"
+    data_path = "proteins/data/virus_protein_repeats.csv"
     # seed = 561
     # train_size = 0.8
     # valid_size = 0
@@ -193,8 +230,11 @@ if __name__ == "__main__":
     # print(valid["virus_name"].value_counts())
     # print(test["virus_name"].value_counts())
 
-    df = pd.DataFrame({"repeat": ["ANQ"]})
-    pos = PositionalEncoder(width = 7)
+    # df = pd.DataFrame({"repeat": ["ANQ"]})
+    # pos = PositionalEncoder(width = 7)
 
-    df = pos.transform(df)
-    print(df)
+    # df = pos.transform(df)
+    # print(df)
+
+    d1, d2 = split_into_proteins(data_path)
+    print(d1, d2)
