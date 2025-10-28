@@ -3,22 +3,34 @@ Association rules results
 Seed: 561
 
 Best parameters
-max_aa_length            7
 min_confidence         0.7
 min_lift               1.3
 min_support          0.001
 min_antecedents          2
 max_antecedents          6
+max_aa_length            7
 resample_strategy    under
 
-Model metrics
-accuracy  : 0.8575141728576984
-precision : 0.9178111252732938
-recall    : 0.8575141728576984
-f1        : 0.8821459692227728
+Model metrics on the test set
+accuracy  : 0.8238713110392534
+precision : 0.8993176398272421
+recall    : 0.8238713110392534
+f1        : 0.8531011668131595
 
 Confusion matrix
- 9657   710   698   520
-   39   565    30   178
- 2510  1781 31606   454
-    8    32     2    71
+ 4763   406   400   224
+   22   298    19    67
+ 1748  1073 15037   318
+    5    19     2    30
+
+Model metrics on the train set
+accuracy  : 0.8321850393700787
+precision : 0.8406754231756333
+recall    : 0.8321850393700787
+f1        : 0.831377554960553
+
+Confusion matrix
+  461    24    18     5
+   11   433    13    51
+   17    21   465     5
+   21   145    10   332

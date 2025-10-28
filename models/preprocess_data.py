@@ -13,24 +13,32 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
 
-COLUMNS_TO_DROP = ["left_end", "right_end", "left_start", "right_start", "sequence_id", "length", "protein_name", "repeat_type"]
+COLUMNS_TO_DROP = ["left_end", "right_end", "left_start", "right_start", "sequence_id", "length", "protein_name"]
 
-def split_into_proteins(data: str | pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    if isinstance(data, str):
-        data = pd.read_csv(data)
-    elif not isinstance(data, pd.DataFrame):
-        raise ValueError("data type is wrong!")
+def split_into_proteins(
+        data: str
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    data = pd.read_csv(data)
     
     groups = [g.reset_index(drop = True) for _, g in data.groupby("protein_name", sort = False)]
     a, b = groups[0], groups[1]
     name_a = str(a.at[0, "protein_name"])
 
     if name_a == "nucleocapsid protein":
-        return b, a
+        a, b = b, a
+
+    data_folder = "proteins/data"
+    spike_path = os.path.join(data_folder, "spike.csv")
+    nucleocapsid_path = os.path.join(data_folder, "nucleocapsid.csv")
+    if not os.path.exists(spike_path):
+        a.to_csv(spike_path, index = False)
+    if not os.path.exists(nucleocapsid_path):
+        b.to_csv(nucleocapsid_path, index = False)
+
     return a, b
 
 def preprocess_data(
-        data: str | pd.DataFrame, 
+        data: str, 
         seed: int, 
         train_size: Optional[float] = None, 
         valid_size: Optional[float] = None, 
@@ -86,10 +94,8 @@ def preprocess_data(
             raise ValueError("Split sizes must add up to 1.")
 
     # Reading data.
-    if isinstance(data, str):
-        data = pd.read_csv(data)
-    elif not isinstance(data, pd.DataFrame):
-        raise ValueError("data type is wrong!")
+    path = data
+    data = pd.read_csv(data)
     
     # Dropping columns.
     data.drop(columns = columns_to_drop, inplace = True)
@@ -114,10 +120,34 @@ def preprocess_data(
         valid_data = train_valid_data.iloc[0:0]
         train_data = train_valid_data
 
+    # data_folder = "proteins\data"
+    train_path = path.split(".")[0] + "_train_" + str(seed) + ".csv"
+    valid_path = path.split(".")[0] + "_valid_" + str(seed) + ".csv"
+    test_path = path.split(".")[0] + "_test_" + str(seed) + ".csv"
+    
+    if not os.path.exists(train_path):
+        train_data.to_csv(train_path, index = False)
+    if not os.path.exists(valid_path):
+        valid_data.to_csv(valid_path, index = False)
+    if not os.path.exists(test_path):
+        test_data.to_csv(test_path, index = False)
+
     return train_data, valid_data, test_data
 
-def rebalance_data(data: pd.DataFrame, seed: int, strategy: str = "over"):
-    X = data[["repeat"]]
+def rebalance_data(
+        data: str, 
+        seed: int, 
+        strategy: str = "over"
+    ) -> pd.DataFrame:
+    path = data
+    data = pd.read_csv(data)
+    seed_data = path.split("_")[-1].split(".")[0]
+    if seed_data != str(seed):
+        return False
+    
+    save_path = "_".join(path.split("_")[:-1])
+
+    X = data.drop(columns = ["virus_name"])
     y = data["virus_name"]
 
     if strategy == "over":
@@ -127,10 +157,11 @@ def rebalance_data(data: pd.DataFrame, seed: int, strategy: str = "over"):
         rus = RandomUnderSampler(random_state = seed)
         Xr, yr = rus.fit_resample(X, y)
     else:
-        return data
+        Xr, yr = X, y
     
     out = pd.concat([Xr, yr], axis = 1)
-    out.columns = ["repeat", "virus_name"]
+    if not os.path.exists(f"{save_path}_{strategy}_{seed}.csv"):
+        out.to_csv(f"{save_path}_{strategy}_{seed}.csv", index = False)
 
     return out
 
@@ -165,7 +196,7 @@ def calculate_metrics(y_test, y_pred) -> Metrics:
 
     return Metrics(accuracy, precision, recall, f1, cm)
 
-def log_training(results_folder: str, model_name: str, leaderboard: pd.DataFrame, best_val_params, metrics, seed):
+def log_training(results_folder: str, model_name: str, leaderboard: pd.DataFrame, best_val_params, metrics_test, metrics_train, seed):
     os.makedirs(results_folder, exist_ok = True)
     ts = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
     path = os.path.join(results_folder, f"{model_name}_report_{ts}.results")
@@ -184,13 +215,22 @@ def log_training(results_folder: str, model_name: str, leaderboard: pd.DataFrame
             f.write(leaderboard.to_string(index = False) + "\n\n")
         f.write("Best parameters\n")
         f.write(pd.Series(best_val_params).to_string() + "\n\n")
-        f.write("Model metrics\n")
-        f.write(f"accuracy  : {metrics.accuracy}\n")
-        f.write(f"precision : {metrics.precision}\n")
-        f.write(f"recall    : {metrics.recall}\n")
-        f.write(f"f1        : {metrics.f1}\n\n")
+        f.write("Model metrics on the test set\n")
+        f.write(f"accuracy  : {metrics_test.accuracy}\n")
+        f.write(f"precision : {metrics_test.precision}\n")
+        f.write(f"recall    : {metrics_test.recall}\n")
+        f.write(f"f1        : {metrics_test.f1}\n\n")
         f.write("Confusion matrix\n")
-        f.write(str(metrics).split("confusion_matrix:\n", -1)[-1])
+        f.write(str(metrics_test).split("confusion_matrix:\n", -1)[-1])
+        f.write("\n\n")
+        f.write("Model metrics on the train set\n")
+        f.write(f"accuracy  : {metrics_train.accuracy}\n")
+        f.write(f"precision : {metrics_train.precision}\n")
+        f.write(f"recall    : {metrics_train.recall}\n")
+        f.write(f"f1        : {metrics_train.f1}\n\n")
+        f.write("Confusion matrix\n")
+        f.write(str(metrics_train).split("confusion_matrix:\n", -1)[-1])
+        f.write("\n")
 
 AMINO_ACIDS = ["A","R","N","D","C","Q","E","G","H","I","L","K","M","F","P","S","T","W","Y","V"]
 PAD = "_"
@@ -216,7 +256,31 @@ class PositionalEncoder(BaseEstimator, TransformerMixin):
             out.append(list(seq))
 
         cols = [f"p{i + 1}" for i in range(self.width)]
-        return pd.DataFrame(out, columns = cols)
+        encoded = pd.DataFrame(out, columns = cols)
+
+        other_cols = X.drop(columns = [self.col_name])
+        out = pd.concat([encoded, other_cols], axis = 1)
+
+        return out
+
+def encode(
+        data: str,
+        max_aa_length: int = 7
+):
+    save_path = data.split(".")[0] + f"_{max_aa_length}_final.csv"
+
+    pos = PositionalEncoder(width = max_aa_length)
+    data = pd.read_csv(data)
+
+    X = data.drop(columns = ["virus_name"])
+    y = data["virus_name"]
+
+    pos.fit(X, y)
+    X = pos.transform(X)
+
+    out = pd.concat([X, y], axis = 1)
+    if not os.path.exists(save_path):
+        out.to_csv(save_path, index = False)
 
 if __name__ == "__main__":
     data_path = "proteins/data/virus_protein_repeats.csv"
@@ -236,5 +300,19 @@ if __name__ == "__main__":
     # df = pos.transform(df)
     # print(df)
 
-    d1, d2 = split_into_proteins(data_path)
-    print(d1, d2)
+    a, b = split_into_proteins(data_path)
+    spike_path = "proteins/data/spike.csv"
+    x, y, z = preprocess_data(spike_path, 561, 0.7, 0.2, 0.1)
+    train_path = "proteins/data/spike_train_561.csv"
+    t = rebalance_data(train_path, 561, "over")
+    t = rebalance_data(train_path, 561, "under")
+    t = rebalance_data(train_path, 561, None)
+    train_path1 = "proteins/data/spike_train_over_561.csv"
+    train_path2 = "proteins/data/spike_train_under_561.csv"
+    train_path3 = "proteins/data/spike_train_None_561.csv"
+    valid_path = "proteins/data/spike_valid_561.csv"
+    test_path = "proteins/data/spike_test_561.csv"
+
+    paths = [train_path1, train_path2, train_path3, valid_path, test_path]
+    for path in paths:
+        encode(path)
